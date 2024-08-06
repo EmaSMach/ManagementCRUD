@@ -1,6 +1,8 @@
-from repositories import BaseProductRepository, ProductFactory, ProductNotFoundError
-from views import CLIView
 from datetime import datetime
+
+from repositories import (BaseProductRepository, ProductFactory,
+                          ProductNotFoundError)
+from views import CLIView
 
 
 class Controller:

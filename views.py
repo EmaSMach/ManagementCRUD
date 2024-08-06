@@ -1,8 +1,7 @@
-from models import BaseProduct
+import os
 from typing import Literal
 
-import os
-
+from models import BaseProduct
 
 PRODUCT_TYPES = Literal["generic", "electronic", "food", "clothing"]
 

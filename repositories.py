@@ -1,6 +1,7 @@
-from models import BaseProduct, ProductFactory
 import json
 from abc import ABC, abstractmethod
+
+from models import BaseProduct, ProductFactory
 
 
 class ProductNotFoundError(Exception):
@@ -227,6 +228,7 @@ class RepositoryFactory:
 if __name__ == "__main__":
     import unittest
     from unittest import mock
+
     from models import Product
 
     class TestListProductRepository(unittest.TestCase):

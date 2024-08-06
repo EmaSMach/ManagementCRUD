@@ -1,5 +1,5 @@
-from repositories import BaseProductRepository
 from models import BaseProduct
+from repositories import BaseProductRepository
 
 
 class ProductService:
