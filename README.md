@@ -24,3 +24,6 @@ Activate the virtual environment:
 ```
 
 ## Usage:
+```bash
+python main.py
+```
