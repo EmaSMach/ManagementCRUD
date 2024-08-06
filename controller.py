@@ -1,5 +1,6 @@
 from repositories import BaseProductRepository, ProductFactory, ProductNotFoundError
 from views import CLIView
+from datetime import datetime
 
 
 class Controller:
@@ -8,20 +9,46 @@ class Controller:
         self.view = view
         self.product_factory = product_factory
 
+    def convert_data(self, data: dict):
+        for key, value in data.items():
+            if key == "price":
+                data[key] = float(value)
+            if key == "stock":
+                data[key] = int(value)
+            if key == "available":
+                if value.lower() in ("true", "yes", "1"):
+                    data[key] = True
+                else:
+                    data[key] = False
+            if key == "warranty":
+                data[key] = int(value)
+            if key == "expiration_date":
+                data[key] = datetime.strptime(value, "%Y-%m-%d")
+        return data
+
     def add_product(self):
         product_types = self.repository.get_product_types()
-        selected_product_type = self.view.show_menu(product_types)
+        while True:
+            try:
+                selected_product_type = self.view.show_menu(product_types)
+                break
+            except ValueError:
+                self.view.show_message("Invalid option")
+                self.view.wait_for_user()
         if not selected_product_type:
             return False
         product_fields = self.product_factory.get_product_class(selected_product_type).get_field_names()
         product_data = self.view.add_product(product_fields)
+        product_data["product_type"] = selected_product_type
         if not product_data:
             return
         try:
+            product_data = self.convert_data(product_data)
             new_product = self.product_factory.create_product(**product_data)
             self.repository.add(new_product)
-        except Exception:
-            self.view.show_message("Error adding product")
+        except Exception as ex:
+            self.view.show_message("Error adding product", ex)
+            self.view.wait_for_user()
 
     def list_products(self):
         products = self.repository.list()
@@ -37,16 +64,42 @@ class Controller:
         self.view.show_product_details(product)
 
     def update_product(self):
-        product_id = self.view.get_product_id()
-        product = self.repository.get(product_id)
-        updated_product = self.view.get_product_data(product.product_type)
-        self.repository.update(product_id, updated_product)
+        product_code = input("Enter the product code to update: ")
+        if not product_code:
+            self.view.show_message("No code entered")
+            self.view.wait_for_user()
+            return
+        try:
+            product = self.repository.get(product_code)
+        except ProductNotFoundError:
+            self.view.show_message("Product does not exist: ", product_code)
+            self.view.wait_for_user()
+            return
+        except Exception:
+            self.view.show_message("Error updating product: ", product_code)
+            self.view.wait_for_user()
+            return
+        original_data = product.to_dict()
+        updated_data = self.view.update_product(original_data)
+        if not updated_data:
+            self.view.show_message("No changes made")
+            self.view.wait_for_user()
+            return
+        original_data.update(updated_data)
+        try:
+            updated_product = self.product_factory.create_product(**original_data)
+            self.repository.update(updated_product)
+            self.view.show_message("Product updated")
+            self.view.wait_for_user()
+        except Exception as ex:
+            self.view.show_message("Error updating product: ", product_code, ex)
+            self.view.wait_for_user()
 
     def delete_product(self):
         product_code = self.view.delete_product()
         if product_code:
             try:
-                print(self.repository.delete(product_code))
+                self.repository.delete(product_code)
             except ProductNotFoundError:
                 self.view.show_message("Product does not exist: ", product_code)
                 self.view.wait_for_user()
@@ -55,7 +108,8 @@ class Controller:
                 self.view.show_message("Error deleting product: ", product_code)
                 self.view.wait_for_user()
                 return False
-            print("Product deleted")
+            self.view.show_message("Product deleted")
+            self.view.wait_for_user()
             return True
         self.view.show_message("No code entered")
         self.view.wait_for_user()
@@ -73,7 +127,7 @@ class Controller:
             elif main_menu_selected_option == "3":
                 self.show_product_details()
             elif main_menu_selected_option == "4":
-                pass
+                self.update_product()
             elif main_menu_selected_option == "5":
                 self.delete_product()
 

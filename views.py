@@ -15,13 +15,13 @@ class Menu:
 
 
 class CLIView:
-    def show_menu(self, menu: Menu | list[str]):
+    def show_menu(self, menu: Menu | list[str], back_text: str = "Back"):
         self.clear_screen()
         if isinstance(menu, Menu):
             print(f"{menu.title}\n")
             for i, option in enumerate(menu.options):
                 print(f"{i+1}. {option}")
-            print(f"0. {menu.back_option}\n")
+            print(f"0. {back_text or menu.back_option}\n")
             return input("Select an option: ")
         if isinstance(menu, list):
             for i, option in enumerate(menu):
@@ -47,7 +47,12 @@ class CLIView:
                 "Delete Product",
             ],
         )
-        return self.show_menu(main_menu)
+        while True:
+            try:
+                return self.show_menu(main_menu, back_text="Exit")
+            except ValueError:
+                print("Invalid option")
+                input()
 
     def wait_for_user(self):
         input("Press enter to continue...")
@@ -55,8 +60,18 @@ class CLIView:
     def delete_product(self):
         return input("Enter the product ID to delete: ")
 
-    def update_product(self):
-        return input("Enter the product ID to update: ")
+    def update_product(self, product_data):
+        self.clear_screen()
+        print("Update Product")
+        update_data = {}
+        print("Enter new product data. Leave blank to keep the original value.")
+        for key, value in product_data.items():
+            if key in ("product_type", "code"):
+                continue
+            new_value = input(f"{key} ({value}): ")
+            if new_value:
+                update_data[key] = new_value
+        return update_data
 
     def search_product(self):
         self.clear_screen()
@@ -72,6 +87,8 @@ class CLIView:
     def add_product(self, fields: list[str]):
         product_data = {}
         for field in fields:
+            if field == "product_type":
+                continue
             product_data[field] = input(f"Enter {field}: ")
         return product_data
 
