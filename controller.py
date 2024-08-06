@@ -18,7 +18,7 @@ class Controller:
             if key == "stock":
                 data[key] = int(value)
             if key == "available":
-                if value.lower() in ("true", "yes", "1"):
+                if not value or value.lower() in ("true", "yes", "1"):
                     data[key] = True
                 else:
                     data[key] = False
