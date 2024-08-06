@@ -102,8 +102,3 @@ class CLIView:
         print(product)
         input("Press enter to continue...")
         return None
-
-
-if __name__ == "__main__":
-    view = CLIView()
-    selected_option = view.main_menu()
