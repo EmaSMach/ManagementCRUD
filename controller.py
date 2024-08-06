@@ -49,7 +49,7 @@ class Controller:
             new_product = self.product_factory.create_product(**product_data)
             self.repository.add(new_product)
         except Exception as ex:
-            self.view.show_message("Error adding product", ex)
+            self.view.show_message("Error adding product:", ex)
             self.view.wait_for_user()
 
     def list_products(self):
@@ -79,6 +79,11 @@ class Controller:
             return
         except Exception:
             self.view.show_message("Error updating product: ", product_code)
+            self.view.wait_for_user()
+            return
+        # rare cases
+        if product is None:
+            self.view.show_message("Product not found")
             self.view.wait_for_user()
             return
         original_data = product.to_dict()
