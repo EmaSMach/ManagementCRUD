@@ -9,7 +9,7 @@ It has a console interface for the moment (CLI), but I want to add a GUI later.
 Written in python version 3.12. It may also work with older python versions.
 
 ## Setup:
-Even though it does not have specific requirements, it is alwasy a good idea to create a virtual environment:
+Even though it does not have specific requirements, it is always a good idea to create a virtual environment:
 
 For linux:
 
