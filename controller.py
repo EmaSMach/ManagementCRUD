@@ -94,7 +94,8 @@ class Controller:
             return
         original_data.update(updated_data)
         try:
-            updated_product = self.product_factory.create_product(**original_data)
+            product_data = self.convert_data(original_data)
+            updated_product = self.product_factory.create_product(**product_data)
             self.repository.update(updated_product)
             self.view.show_message("Product updated")
             self.view.wait_for_user()
