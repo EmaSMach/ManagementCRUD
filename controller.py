@@ -18,8 +18,10 @@ class Controller:
             if key == "stock":
                 data[key] = int(value)
             if key == "available":
-                if not value or value.lower() in ("true", "yes", "1"):
-                    data[key] = True
+                if value is not None:
+                    if isinstance(value, str):
+                        value = value.lower() in ("true", "yes", "1", "si", "sí")
+                        data[key] = value
                 else:
                     data[key] = False
             if key == "warranty":
