@@ -340,6 +340,7 @@ class ProductFactory:
 if __name__ == "__main__":
     import unittest
 
+
     class TestBaseProduct(unittest.TestCase):
         def test_code(self):
             product = BaseProduct("123", "Product", 10)
@@ -392,6 +393,7 @@ if __name__ == "__main__":
                 },
             )
 
+
     class TestProduct(unittest.TestCase):
         def test_product(self):
             product = Product("123", "Product", 10)
@@ -416,6 +418,7 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
+
 
     class TestElectronicProduct(unittest.TestCase):
         def test_electronic_product(self):
@@ -445,6 +448,7 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
+
 
     class TestFoodProduct(unittest.TestCase):
         def test_food_product(self):
@@ -484,6 +488,7 @@ if __name__ == "__main__":
                 },
             )
 
+
     class TestClothingProduct(unittest.TestCase):
         def test_clothing_product(self):
             product = ClothingProduct("123", "Product", 10, size="M", color="blue")
@@ -514,5 +519,6 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
+
 
     unittest.main()

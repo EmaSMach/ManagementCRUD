@@ -231,6 +231,7 @@ if __name__ == "__main__":
 
     from models import Product
 
+
     class TestListProductRepository(unittest.TestCase):
         def setUp(self):
             self.product = Product("1", "Product", 10)
@@ -262,6 +263,7 @@ if __name__ == "__main__":
             with self.assertRaises(ValueError):
                 self.repository.delete("2")
 
+
     class TestDictProductRepository(unittest.TestCase):
         def setUp(self):
             self.product = Product("1", "Product", 10)
@@ -292,6 +294,7 @@ if __name__ == "__main__":
         def test_delete_product_not_found(self):
             with self.assertRaises(ValueError):
                 self.repository.delete("2")
+
 
     class TestJsonProductRepository(unittest.TestCase):
         def setUp(self):
@@ -332,5 +335,6 @@ if __name__ == "__main__":
             with mock.patch("__main__.open", mock.mock_open()):
                 with self.assertRaises(ValueError):
                     self.repository.delete("2")
+
 
     unittest.main()

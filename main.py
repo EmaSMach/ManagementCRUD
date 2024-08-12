@@ -1,4 +1,3 @@
-
 from controller import Controller
 from models import ProductFactory
 from views import CLIView

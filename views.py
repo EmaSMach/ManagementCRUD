@@ -19,12 +19,12 @@ class CLIView:
         if isinstance(menu, Menu):
             print(f"{menu.title}\n")
             for i, option in enumerate(menu.options):
-                print(f"{i+1}. {option}")
+                print(f"{i + 1}. {option}")
             print(f"0. {back_text or menu.back_option}\n")
             return input("Select an option: ")
         if isinstance(menu, list):
             for i, option in enumerate(menu):
-                print(f"{i+1}. {option}")
+                print(f"{i + 1}. {option}")
             print("0. Cancel\n")
             selected = input("Select an option: ")
             if selected == "0":
