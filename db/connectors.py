@@ -26,11 +26,6 @@ class MySqlConnector:
         self.port = conf("DB_PORT")
         self.table_definitions = table_definitions
 
-        print("HOST:", self.host)
-        print("USER:", self.user)
-        print("PASSWORD:", self.password)
-        print("DATABASE:", self.database)
-
     def get_existing_connection_and_cursor(self):
         """Return the existing connection object"""
         return self.__connection, self.__cursor
