@@ -27,7 +27,7 @@ Activate the virtual environment:
 ```
 
 ## Environment variables and other necessary data
-Create a .env file with the following lines and values to make it possible to connect to the database (MySql):
+Create a `.env` file with the following lines and values to make it possible to connect to the database (MySql):
 ```
 DB_HOST=<your_db_host>
 DB_USER=<your_db_user>
