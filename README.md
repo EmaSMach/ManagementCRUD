@@ -36,6 +36,8 @@ DB_NAME=<your_db_name>
 DB_PORT=<your_db_port>
 ```
 Place it in the root folder of the project.
+
+You can create the database and execute the `create_tables.sql` script, or just supply a user with enough privileges in the `.env` file, the app will create the database and the tables for you.
 ## Usage:
 
 ```bash
