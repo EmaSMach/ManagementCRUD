@@ -1,6 +1,8 @@
 import json
 from abc import ABC, abstractmethod
 
+from db.connectors import MySqlConnector
+from loggers import logger
 from models import BaseProduct, ProductFactory
 
 
@@ -210,6 +212,172 @@ class JsonProductRepository(BaseProductRepository):
 
     def _deserialize_product(self, product_data: dict):
         return ProductFactory().create_product(**product_data)
+
+
+class MySQLProductRepository(BaseProductRepository):
+    """Repository that stores products in a MySQL database"""
+
+    def __init__(self, connector: MySqlConnector):
+        self.connector = connector
+
+    def create_tables(self):
+        self.connector.create_database("products")
+        self.connector.create_tables()
+
+    def add(self, product: BaseProduct):
+        _fields = product.get_common_field_names()
+
+        try:
+            query = f"""
+            INSERT INTO products ({", ".join(_fields)})
+            VALUES ({", ".join(["%s" for _ in _fields])})
+            """.strip()
+            query_args = (
+                product.code,
+                product.name,
+                product.price,
+                product.description,
+                product.stock,
+                product.available,
+                product.type,
+            )
+            self.connector.run_query(query, query_args, commit=False)
+            if product.type != "product":
+                _extra_table_name = (
+                    product.type + "s" if product.type == "electronic" else product.type
+                )
+                extra_fields = product.get_extra_field_names()
+                extra_query = f"""
+                INSERT INTO {_extra_table_name} (code, {", ".join(extra_fields)})
+                VALUES (%s, {", ".join(["%s" for _ in extra_fields])})
+                """.strip()
+                extra_query_args = (
+                    product.code,
+                    *[getattr(product, field) for field in extra_fields],
+                )
+                self.connector.run_query(
+                    extra_query,
+                    extra_query_args,
+                    commit=False,
+                )
+        except Exception as ex:
+            logger.error("Error adding product: %s", ex, exc_info=True)
+            self.connector.rollback()
+            raise ex
+        else:
+            self.connector.commit()
+        return self.connector.run_query(
+            "select code from products where code = %s", (product.code,)
+        )
+
+    def get(self, product_id: int | str):
+        product_data = self.connector.run_query(
+            "SELECT * FROM products WHERE code = %s", (str(product_id),)
+        )
+        if product_data:
+            product_type = product_data[0].get("product_type", "product")
+            if product_type == "product":
+                return self._deserialize_product(product_data[0])
+            extra_product_data = self.connector.run_query(
+                f"SELECT * FROM {product_type if product_type != 'electronic' else product_type + 's'} WHERE code = %s",
+                (str(product_id),),
+            )
+            product_data[0].update(extra_product_data[0])
+            return self._deserialize_product(product_data[0])
+        return None
+
+    def _deserialize_product(self, product_data: dict):
+        product_data["available"] = bool(product_data["available"])
+        return ProductFactory().create_product(**product_data)
+
+    def _serialize_product(self, product: BaseProduct):
+        return product.to_dict()
+
+    def list(self):
+        product_data = self.connector.run_query("SELECT * FROM products")
+        for product in product_data:
+            product_type = product.get("product_type", "product")
+            _extra_table = (
+                None
+                if product_type == "product"
+                else (
+                    product_type + "s" if product_type == "electronic" else product_type
+                )
+            )
+            if _extra_table:
+                extra_product_data = self.connector.run_query(
+                    f"SELECT * FROM {_extra_table} WHERE code = %s", (product["code"],)
+                )
+                product.update(extra_product_data[0])
+        return {p["code"]: self._deserialize_product(p) for p in product_data}
+
+    def update(self, product: BaseProduct):
+        _fields = product.get_common_field_names()
+        _fields = tuple([field for field in _fields if field != "code"])
+        try:
+            query = f"""
+            UPDATE products
+            SET {", ".join([f"{field} = %s" for field in _fields])}
+            WHERE code = %s
+            """.strip()
+            query_args = (
+                product.name,
+                product.price,
+                product.description,
+                product.stock,
+                product.available,
+                product.type,
+                product.code,
+            )
+            self.connector.run_query(
+                query,
+                query_args,
+                commit=False,
+            )
+            if product.type != "product":
+                _extra_table_name = (
+                    product.type + "s" if product.type == "electronic" else product.type
+                )
+                extra_fields = product.get_extra_field_names()
+                extra_query = f"""
+                UPDATE {_extra_table_name}
+                SET {", ".join([f"{field} = %s" for field in extra_fields])}
+                WHERE code = %s
+                """.strip()
+                extra_query_args = (
+                    *[getattr(product, field) for field in extra_fields],
+                    product.code,
+                )
+                self.connector.run_query(
+                    extra_query,
+                    extra_query_args,
+                    commit=False,
+                )
+        except Exception as ex:
+            logger.error("Error updating product: %s", ex, exc_info=True)
+            self.connector.rollback()
+            raise ex
+        else:
+            self.connector.commit()
+        return self.connector.run_query(
+            "select code from products where code = %s", (product.code,)
+        )
+
+    def delete(self, product_id: int | str):
+        query = "DELETE FROM products WHERE code = %s"
+        try:
+            affected_rows = self.connector.run_query(query, (str(product_id),))
+            if affected_rows:
+                return affected_rows
+            raise ProductNotFoundError(f"Product with code {product_id} not found")
+        except ProductNotFoundError:
+            raise
+        except Exception as ex:
+            logger.error("Error deleting product: %s", ex, exc_info=True)
+            raise ValueError(f"Product with code {product_id} not found")
+
+    def __str__(self):
+        return "MySQLProductRepository()"
 
 
 class RepositoryFactory:
