@@ -26,6 +26,16 @@ Activate the virtual environment:
 . ./venv/bin/activate
 ```
 
+## Environment variables and other necessary data
+Create a .env file with the following lines and values to make it possible to connect to the database (MySql):
+```
+DB_HOST=<your_db_host>
+DB_USER=<your_db_user>
+DB_PASSWORD=<your_db_password>
+DB_NAME=<your_db_name>
+DB_PORT=<your_db_port>
+```
+Place it in the root folder of the project.
 ## Usage:
 
 ```bash
