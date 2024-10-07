@@ -6,7 +6,12 @@ from views import CLIView
 
 
 class Controller:
-    def __init__(self, repository: BaseProductRepository, view: CLIView, product_factory: ProductFactory) -> None:
+    def __init__(
+        self,
+        repository: BaseProductRepository,
+        view: CLIView,
+        product_factory: ProductFactory,
+    ) -> None:
         self.repository = repository
         self.view = view
         self.product_factory = product_factory
@@ -41,7 +46,9 @@ class Controller:
                 self.view.wait_for_user()
         if not selected_product_type:
             return False
-        product_fields = self.product_factory.get_product_class(selected_product_type).get_field_names()
+        product_fields = self.product_factory.get_product_class(
+            selected_product_type
+        ).get_field_names()
         product_data = self.view.add_product(product_fields)
         product_data["product_type"] = selected_product_type
         if not product_data:
