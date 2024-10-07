@@ -1,6 +1,10 @@
 import datetime
 
 
+class ProductNotFoundError(Exception):
+    pass
+
+
 class BaseProduct:
     """Base class for products"""
 
@@ -30,6 +34,10 @@ class BaseProduct:
 
     @classmethod
     def get_field_names(cls):
+        return cls.get_common_field_names()
+
+    @staticmethod
+    def get_common_field_names():
         return (
             "code",
             "name",
@@ -39,6 +47,10 @@ class BaseProduct:
             "available",
             "product_type",
         )
+
+    @classmethod
+    def get_class_field_names(cls):
+        return cls.get_common_field_names()
 
     @staticmethod
     def get_product_types():
@@ -171,6 +183,9 @@ class BaseProduct:
             "product_type": self.type,
         }
 
+    def get_extra_field_names(self):
+        raise NotImplementedError("Subclasses must implement this method")
+
 
 class Product(BaseProduct):
     """Generic product"""
@@ -210,6 +225,9 @@ class ElectronicProduct(BaseProduct):
 
     def __repr__(self):
         return f"ElectronicProduct({self.code}, {self.name}, {self.price}, {self.description}, {self.stock}, {self.available}, {self.warranty})"
+
+    def get_extra_field_names(self):
+        return ("warranty",)
 
 
 class FoodProduct(BaseProduct):
@@ -253,6 +271,9 @@ class FoodProduct(BaseProduct):
 
     def __repr__(self):
         return f"FoodProduct({self.code}, {self.name}, {self.price}, {self.description}, {self.stock}, {self.available}, {self.expiration_date})"
+
+    def get_extra_field_names(self):
+        return ("expiration_date",)
 
 
 class ClothingProduct(BaseProduct):
@@ -306,6 +327,9 @@ class ClothingProduct(BaseProduct):
     def __repr__(self):
         return f"ClothingProduct({self.code}, {self.name}, {self.price}, {self.description}, {self.stock}, {self.available}, {self.size}, {self.color})"
 
+    def get_extra_field_names(self):
+        return ("size", "color")
+
 
 class ProductFactory:
     """Factory class for creating products"""
@@ -339,7 +363,6 @@ class ProductFactory:
 
 if __name__ == "__main__":
     import unittest
-
 
     class TestBaseProduct(unittest.TestCase):
         def test_code(self):
@@ -393,7 +416,6 @@ if __name__ == "__main__":
                 },
             )
 
-
     class TestProduct(unittest.TestCase):
         def test_product(self):
             product = Product("123", "Product", 10)
@@ -418,7 +440,6 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
-
 
     class TestElectronicProduct(unittest.TestCase):
         def test_electronic_product(self):
@@ -448,7 +469,6 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
-
 
     class TestFoodProduct(unittest.TestCase):
         def test_food_product(self):
@@ -488,7 +508,6 @@ if __name__ == "__main__":
                 },
             )
 
-
     class TestClothingProduct(unittest.TestCase):
         def test_clothing_product(self):
             product = ClothingProduct("123", "Product", 10, size="M", color="blue")
@@ -519,6 +538,5 @@ if __name__ == "__main__":
                     "product_type": "product",
                 },
             )
-
 
     unittest.main()
